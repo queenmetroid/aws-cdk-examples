@@ -1,4 +1,3 @@
-
 # AWS API Gateway HTTP API to AWS Lambda in VPC to DynamoDB CDK Python Sample!
 
 
@@ -7,6 +6,13 @@
 Creates an [AWS Lambda](https://aws.amazon.com/lambda/) function writing to [Amazon DynamoDB](https://aws.amazon.com/dynamodb/) and invoked by [Amazon API Gateway](https://aws.amazon.com/api-gateway/) REST API. 
 
 ![architecture](docs/architecture.png)
+
+## Features
+
+### Observability
+- **AWS X-Ray Tracing**: End-to-end distributed tracing enabled across API Gateway, Lambda, and DynamoDB
+- **CloudWatch Alarms**: Automated alerts for Lambda errors and performance issues
+- **Custom Subsegments**: Detailed tracing of DynamoDB operations and business logic
 
 ## Setup
 
@@ -84,6 +90,19 @@ You should get below response
 ```json
 {"message": "Successfully inserted data!"}
 ```
+
+## Monitoring and Observability
+
+### Viewing X-Ray Traces
+1. Navigate to AWS X-Ray console
+2. Select "Service Map" to view the complete request flow: API Gateway → Lambda → DynamoDB
+3. Select "Traces" to view individual request traces with detailed timing information
+4. Use filters to find traces by annotation (e.g., `annotation.operation = "insert_custom_item"`)
+
+### CloudWatch Alarms
+The stack creates the following alarms:
+- **LambdaErrorAlarm**: Triggers when Lambda errors exceed 5 in a single evaluation period
+- **LambdaDurationAlarm**: Triggers when Lambda duration exceeds 60 seconds for 2 consecutive periods
 
 ## Cleanup 
 Run below script to delete AWS resources created by this sample stack.
