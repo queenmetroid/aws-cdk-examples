@@ -14,6 +14,13 @@ Creates an [AWS Lambda](https://aws.amazon.com/lambda/) function writing to [Ama
 - **CloudWatch Alarms**: Automated alerts for Lambda errors and performance issues
 - **Custom Subsegments**: Detailed tracing of DynamoDB operations and business logic
 
+### Security and Compliance
+- **API Gateway Access Logs**: Comprehensive logging of all API requests with caller identity, IP, and response details
+- **API Gateway Execution Logs**: Detailed operational logs for debugging and performance analysis
+- **Lambda CloudWatch Logs**: 1-year retention policy for audit and compliance
+- **VPC Flow Logs**: Network traffic monitoring for security investigations
+- **DynamoDB Point-in-Time Recovery**: Continuous backups for data protection and audit trails
+
 ## Setup
 
 The `cdk.json` file tells the CDK Toolkit how to execute your app.
@@ -103,6 +110,62 @@ You should get below response
 The stack creates the following alarms:
 - **LambdaErrorAlarm**: Triggers when Lambda errors exceed 5 in a single evaluation period
 - **LambdaDurationAlarm**: Triggers when Lambda duration exceeds 60 seconds for 2 consecutive periods
+
+## Security and Compliance
+
+### Logging Configuration
+This stack implements comprehensive logging for security investigations and compliance:
+
+#### API Gateway Logs
+- **Access Logs**: Captured in CloudWatch Logs with 1-year retention
+  - Includes: caller identity, IP address, HTTP method, request time, response status
+  - Query using CloudWatch Logs Insights
+- **Execution Logs**: INFO level logging for detailed request/response debugging
+
+#### Lambda Logs
+- **CloudWatch Logs**: Automatic logging with 1-year retention policy
+- Query logs using CloudWatch Logs Insights for security investigations
+
+#### VPC Flow Logs
+- **Network Traffic**: All traffic (ACCEPT and REJECT) logged to CloudWatch
+- **Retention**: 1-year retention for security analysis
+- Use for investigating network anomalies and security incidents
+
+#### DynamoDB
+- **Point-in-Time Recovery**: Enabled for continuous backups
+- Allows recovery from accidental data modifications or deletions
+- Provides audit trail for data changes
+
+### CloudTrail Requirements
+This stack requires AWS CloudTrail to be enabled at the account or organization level to log API calls for security audit purposes. Ensure CloudTrail is configured to capture:
+- Management events for all services
+- Data events for DynamoDB table operations
+- Lambda function invocations
+
+If CloudTrail is not configured at the account level, consider adding it to this stack or enabling it through AWS Organizations.
+
+### Querying Logs for Security Investigations
+
+**API Gateway Access Logs:**
+```
+fields @timestamp, ip, httpMethod, resourcePath, status
+| filter status >= 400
+| sort @timestamp desc
+```
+
+**Lambda Function Logs:**
+```
+fields @timestamp, @message
+| filter @message like /ERROR/
+| sort @timestamp desc
+```
+
+**VPC Flow Logs:**
+```
+fields @timestamp, srcAddr, dstAddr, srcPort, dstPort, action
+| filter action = "REJECT"
+| sort @timestamp desc
+```
 
 ## Cleanup 
 Run below script to delete AWS resources created by this sample stack.
